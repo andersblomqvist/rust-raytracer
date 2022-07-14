@@ -2,38 +2,38 @@ use std::f32;
 
 use raytracer::{
     vec3::Vec3, 
-    ray::{Ray, Intersectable}, 
+    ray::{Ray, Intersectable, Intersection}, 
     sphere::Sphere, 
     camera::Camera, 
     utils::{random_f32, clamp}, 
-    material::Material
+    material::{Material, MaterialType}
 };
 
 // Antialiasing
 const SAMPLES_PER_PIXEL: i32 = 32;
 
-// Diffuse boucing recursive depth
+// Max recursive depth for Diffuse bouncing
 const MAX_DEPTH: i32 = 16;
 
 fn main() {
 
     // Image 
-    let width: i32 = 1280;
+    let width: i32 = 400;
     let aspect_ratio: f32 = 16.0 / 9.0;
     let height: i32 = ((width as f32) / aspect_ratio) as i32;
 
     // World
-    let mat_ground = Material::metal(Vec3::new(0.8, 0.8, 0.8), 0.3);
-    let mat_center = Material::diffuse(Vec3::new(0.3, 0.5, 0.9));
-    let mat_left   = Material::metal(Vec3::new(0.9, 0.9, 0.9), 0.01);
-    let mat_right  = Material::metal(Vec3::new(0.8, 0.3, 0.2), 0.6);
+    let mat_ground = Material::new(Vec3::new(0.8, 0.8, 0.8), 0.1, 0.0, MaterialType::Metal);
+    let mat_center = Material::new(Vec3::new(0.3, 0.5, 0.9), 0.0, 0.0, MaterialType::Diffuse);
+    let mat_left   = Material::new(Vec3::new(0.0, 0.0, 0.0), 0.0, 1.5, MaterialType::Dielectric);
+    let mat_right  = Material::new(Vec3::new(0.8, 0.3, 0.2), 0.6, 1.3, MaterialType::Dielectric);
 
-    // Order matters
     let world: Vec<Sphere> = vec![
-        Sphere::new(Vec3::new( 0.0,    0.0, -1.0),   0.5, mat_center),
-        Sphere::new(Vec3::new(-1.3,    0.0, -1.0),   0.5, mat_left),
-        Sphere::new(Vec3::new( 1.0,    0.5, -2.0),   1.0, mat_right),
         Sphere::new(Vec3::new( 0.0, -100.5, -1.0), 100.0, mat_ground),
+        Sphere::new(Vec3::new( 0.0,    0.0, -1.0),   0.5, mat_center),
+        Sphere::new(Vec3::new(-1.0,    0.0, -1.0),  -0.45, mat_left),
+        Sphere::new(Vec3::new(-1.0,    0.0, -1.0),   0.5, mat_left),
+        Sphere::new(Vec3::new( 1.0,    0.0, -1.0),   0.5, mat_right),
     ];
 
     // Camera
@@ -97,18 +97,16 @@ pub fn ray_color(r: Ray, world: &Vec<Sphere>, depth: i32) -> Vec3 {
     if depth <= 0 {
         return Vec3::zero();
     }
+    
+    if let Some(intersection) = closest_intersection(&r, &world) {
+        // Scatter ray based on material
+        let (scatter, attenuation, scattered) = 
+            intersection.material.scatter(&r, &intersection);
 
-    for sphere in world {
-        if let Some(intersection) = sphere.hit(&r, 0.001, f32::MAX) {
-            // Scatter ray based on material
-            let (scatter, attenuation, scattered) = 
-                intersection.material.scatter(&r, &intersection);
-
-            if scatter {
-                return attenuation * ray_color(scattered, world, depth - 1);
-            } else {
-                return Vec3::zero();
-            }
+        if scatter {
+            return attenuation * ray_color(scattered, world, depth - 1);
+        } else {
+            return Vec3::zero();
         }
     }
 
@@ -117,3 +115,25 @@ pub fn ray_color(r: Ray, world: &Vec<Sphere>, depth: i32) -> Vec3 {
     (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
 }
 
+/**
+ *  Returns the closest intersection for ray, if any.
+ */
+pub fn closest_intersection(r: &Ray, world: &Vec<Sphere>) -> Option<Intersection> {
+
+    let mut hit = false;
+    let mut closest_so_far = f32::MAX;
+    let mut closest_intersection: Intersection = Intersection::default();
+
+    for sphere in world {
+        if let Some(intersection) = sphere.hit(r, 0.001, closest_so_far) {
+            closest_intersection = intersection;
+            closest_so_far = closest_intersection.t;
+            hit = true;
+        }
+    }
+
+    if hit {
+        return Some(closest_intersection);
+    }
+    None
+}

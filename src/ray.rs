@@ -5,12 +5,13 @@ pub struct Ray {
     pub direction: Vec3,
 }
 
-pub struct Intersection<'a> {
+#[derive(Default)]
+pub struct Intersection {
     pub point: Vec3,
     pub normal: Vec3,
     pub t: f32,
     pub front_face: bool,
-    pub material: &'a Material,
+    pub material: Material,
 }
 
 impl Ray {
@@ -27,8 +28,8 @@ pub trait Intersectable {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<Intersection>;
 }
 
-impl Intersection<'_> {
-    pub fn new(point: Vec3, normal: Vec3, t: f32, material: &Material) -> Intersection {
+impl Intersection {
+    pub fn new(point: Vec3, normal: Vec3, t: f32, material: Material) -> Intersection {
         Intersection{ point, normal, t, front_face: false, material }
     }
 

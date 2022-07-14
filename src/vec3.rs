@@ -13,6 +13,7 @@ impl Vec3 {
     
     pub fn new(x: f32, y: f32, z: f32) -> Vec3 { Vec3 { x, y, z } }
     pub fn zero() -> Vec3 { Vec3 { x: 0.0, y: 0.0, z: 0.0 } }
+    pub const fn const_zero() -> Vec3 { Vec3 { x: 0.0, y: 0.0, z: 0.0 } }
 
     pub fn random() -> Vec3 {
         Vec3 {
@@ -101,6 +102,23 @@ impl Vec3 {
      */
     pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
         v - 2.0 * v.dot(n) * n
+    }
+
+    /**
+     *  Returns the refraction vector when uv hits a surface with normal n and
+     *  refractive indicies etai_over_etat.
+     */
+    pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f32) -> Vec3 {
+        let cos_theta = f32::min(-uv.dot(n), 1.0);
+        let r_out_perp = etai_over_etat * (uv + cos_theta * n);
+        let r_out_parallel = -f32::sqrt(f32::abs(1.0 - r_out_perp.length_squared())) * n;
+        r_out_perp + r_out_parallel
+    }
+}
+
+impl Default for Vec3 {
+    fn default() -> Self {
+        Vec3::zero()
     }
 }
 

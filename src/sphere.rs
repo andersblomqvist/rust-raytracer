@@ -40,7 +40,7 @@ impl Intersectable for Sphere {
         let outward_normal = (point - self.center) / self.radius;
         let t = root;
 
-        let mut intersection = Intersection::new(point, outward_normal, t, &self.material);
+        let mut intersection = Intersection::new(point, outward_normal, t, self.material);
         intersection.set_face_normal(r, outward_normal);
 
         Some(intersection)
