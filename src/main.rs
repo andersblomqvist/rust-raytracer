@@ -26,7 +26,9 @@ fn main() {
     let lookfrom = Vec3::new(-2.0, 2.0, 1.0);
     let lookat = Vec3::new(0.0, 0.0, -1.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
-    let camera = Camera::new(lookfrom, lookat, vup, 30.0, aspect_ratio);
+    let dist_to_focus = (lookfrom - lookat).length();
+    let aperture = 0.6;
+    let camera = Camera::new(lookfrom, lookat, vup, 30.0, aspect_ratio, aperture, dist_to_focus);
 
     // World
     let mat_ground = Material::new(Vec3::new(0.8, 0.8, 0.8), 0.1, 0.0, MaterialType::Metal);
