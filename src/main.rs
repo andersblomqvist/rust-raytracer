@@ -22,6 +22,12 @@ fn main() {
     let aspect_ratio: f32 = 16.0 / 9.0;
     let height: i32 = ((width as f32) / aspect_ratio) as i32;
 
+    // Camera
+    let lookfrom = Vec3::new(-2.0, 2.0, 1.0);
+    let lookat = Vec3::new(0.0, 0.0, -1.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let camera = Camera::new(lookfrom, lookat, vup, 30.0, aspect_ratio);
+
     // World
     let mat_ground = Material::new(Vec3::new(0.8, 0.8, 0.8), 0.1, 0.0, MaterialType::Metal);
     let mat_center = Material::new(Vec3::new(0.3, 0.5, 0.9), 0.0, 0.0, MaterialType::Diffuse);
@@ -35,17 +41,6 @@ fn main() {
         Sphere::new(Vec3::new(-1.0,    0.0, -1.0),   0.5, mat_left),
         Sphere::new(Vec3::new( 1.0,    0.0, -1.0),   0.5, mat_right),
     ];
-
-    // Camera
-    let viewport_height = 2.0;
-    let viewport_width = aspect_ratio * viewport_height;
-    let focal_length = 1.0;
-    let camera = Camera::new(
-        aspect_ratio, 
-        viewport_width, 
-        viewport_height, 
-        focal_length
-    );
 
     // Create .ppm image with std out. A .ppm image is just a text file.
     println!("P3\n{} {}\n255", width, height);
