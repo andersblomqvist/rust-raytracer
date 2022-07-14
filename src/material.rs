@@ -47,16 +47,7 @@ impl Material {
             material_type,
         }
     }
-
-    pub const fn const_new(albedo: Vec3, roughness: f32, ir: f32, material_type: MaterialType) -> Material {
-        Material {
-            albedo,
-            roughness,
-            ir,
-            material_type,
-        }
-    }
-
+    
     fn lambertian_scatter(&self, _r_in: &Ray, intersection: &Intersection) -> (bool, Vec3, Ray) {
         let mut scatter_direction = intersection.normal + Vec3::random_unit_vector();
 
