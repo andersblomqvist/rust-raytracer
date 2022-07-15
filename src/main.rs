@@ -1,4 +1,4 @@
-use std::f32;
+use std::{f32, vec};
 
 use raytracer::{
     vec3::Vec3, 
@@ -10,39 +10,79 @@ use raytracer::{
 };
 
 // Antialiasing
-const SAMPLES_PER_PIXEL: i32 = 32;
+const SAMPLES_PER_PIXEL: i32 = 50;
 
 // Max recursive depth for Diffuse bouncing
-const MAX_DEPTH: i32 = 16;
+const MAX_DEPTH: i32 = 50;
+
+/**
+ *  Generate a random scene with a lot of balls.
+ */
+fn random_scene() -> Vec<Sphere> {
+    let mut world: Vec<Sphere> = vec![];
+
+    let mat_ground = Material::new(Vec3::new(0.8, 0.8, 0.8), 0.1, 0.0, MaterialType::Metal);
+    world.push(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, mat_ground));
+
+    let point = Vec3::new(4.0, 0.2, 0.0);
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = random_f32();
+            let center = Vec3::new(a as f32 + 0.9 * random_f32(), 0.2, b as f32 + 0.9 * random_f32());
+
+            if (center - point).length() > 0.9 {
+                if choose_mat < 0.8 {
+                    // diffuse
+                    let albedo = Vec3::random() * Vec3::random();
+                    let diffuse = Material::new(albedo, 0.0, 0.0, MaterialType::Diffuse);
+                    world.push(Sphere::new(center, 0.2, diffuse));
+                }
+                else if choose_mat < 0.95 {
+                    // metal
+                    let albedo = Vec3::random_range(0.5, 1.0);
+                    let roughness = random_f32();
+                    let metal = Material::new(albedo, roughness, 0.0, MaterialType::Metal);
+                    world.push(Sphere::new(center, 0.2, metal));
+                }
+                else {
+                    // glass
+                    let glass = Material::new(Vec3::zero(), 0.0, 1.5, MaterialType::Dielectric);
+                    world.push(Sphere::new(center, 0.2, glass));
+                }
+            }
+        }
+    }
+
+    let mat_glass = Material::new(Vec3::zero(), 0.0, 1.5, MaterialType::Dielectric);
+    world.push(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, mat_glass));
+
+    let mat_diffuse = Material::new(Vec3::new(0.4, 0.2, 0.1), 0.0, 0.0, MaterialType::Diffuse);
+    world.push(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, mat_diffuse));
+
+    let mat_metal = Material::new(Vec3::new(0.7, 0.6, 0.5), 0.0, 0.0, MaterialType::Metal);
+    world.push(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, mat_metal));
+
+    world
+}
 
 fn main() {
 
     // Image 
-    let width: i32 = 400;
-    let aspect_ratio: f32 = 16.0 / 9.0;
+    let width: i32 = 1280;
+    let aspect_ratio: f32 = 3.0 / 2.0;
     let height: i32 = ((width as f32) / aspect_ratio) as i32;
 
     // Camera
-    let lookfrom = Vec3::new(-2.0, 2.0, 1.0);
-    let lookat = Vec3::new(0.0, 0.0, -1.0);
+    let lookfrom = Vec3::new(13.0, 2.0, 3.0);
+    let lookat = Vec3::new(0.0, 0.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
-    let dist_to_focus = (lookfrom - lookat).length();
-    let aperture = 0.6;
-    let camera = Camera::new(lookfrom, lookat, vup, 30.0, aspect_ratio, aperture, dist_to_focus);
+    let dist_to_focus = 10.0;
+    let aperture = 0.1;
+    let vfov = 20.0;
+    let camera = Camera::new(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus);
 
     // World
-    let mat_ground = Material::new(Vec3::new(0.8, 0.8, 0.8), 0.1, 0.0, MaterialType::Metal);
-    let mat_center = Material::new(Vec3::new(0.3, 0.5, 0.9), 0.0, 0.0, MaterialType::Diffuse);
-    let mat_left   = Material::new(Vec3::new(0.0, 0.0, 0.0), 0.0, 1.5, MaterialType::Dielectric);
-    let mat_right  = Material::new(Vec3::new(0.8, 0.3, 0.2), 0.6, 1.3, MaterialType::Dielectric);
-
-    let world: Vec<Sphere> = vec![
-        Sphere::new(Vec3::new( 0.0, -100.5, -1.0), 100.0, mat_ground),
-        Sphere::new(Vec3::new( 0.0,    0.0, -1.0),   0.5, mat_center),
-        Sphere::new(Vec3::new(-1.0,    0.0, -1.0),  -0.45, mat_left),
-        Sphere::new(Vec3::new(-1.0,    0.0, -1.0),   0.5, mat_left),
-        Sphere::new(Vec3::new( 1.0,    0.0, -1.0),   0.5, mat_right),
-    ];
+    let world = random_scene();
 
     // Create .ppm image with std out. A .ppm image is just a text file.
     println!("P3\n{} {}\n255", width, height);
