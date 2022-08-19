@@ -10,7 +10,6 @@ A simple multithreading was also implemented to speed up rendering times. This w
 | ----------------- |:------------------ |:------------------- |
 | 256x144 50 SPP    | 7                  | 54                  |
 | 256x144 500 SPP   | 72                 | 530                 |
-|                   |                    |                     |
 
 **Table 1:** Comparison of rendering times between multi and single-threading.
 
