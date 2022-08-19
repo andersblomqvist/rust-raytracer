@@ -11,10 +11,10 @@ use raytracer::{
 };
 
 // Antialiasing
-const SAMPLES_PER_PIXEL: i32 = 500;
+const SAMPLES_PER_PIXEL: i32 = 250;
 
 // Max recursive depth for Diffuse bouncing
-const MAX_DEPTH: i32 = 32;
+const MAX_DEPTH: i32 = 64;
 
 pub struct RenderContext {
     width: i32,
@@ -29,7 +29,7 @@ pub struct RenderContext {
 fn random_scene() -> Vec<Sphere> {
     let mut world: Vec<Sphere> = vec![];
 
-    let mat_ground = Material::new(Vec3::new(0.8, 0.8, 0.8), 0.1, 0.0, MaterialType::Metal);
+    let mat_ground = Material::new(Vec3::new(0.8, 0.8, 0.8), 0.1, 0.0, MaterialType::Diffuse);
     world.push(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, mat_ground));
 
     let point = Vec3::new(4.0, 0.2, 0.0);
@@ -64,10 +64,10 @@ fn random_scene() -> Vec<Sphere> {
     let mat_glass = Material::new(Vec3::zero(), 0.0, 1.5, MaterialType::Dielectric);
     world.push(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, mat_glass));
 
-    let mat_diffuse = Material::new(Vec3::new(0.8, 0.2, 0.1), 0.0, 0.0, MaterialType::Diffuse);
+    let mat_diffuse = Material::new(Vec3::new(0.1, 0.2, 0.9), 0.0, 0.0, MaterialType::Diffuse);
     world.push(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, mat_diffuse));
 
-    let mat_metal = Material::new(Vec3::new(0.7, 0.6, 0.5), 0.0, 0.0, MaterialType::Metal);
+    let mat_metal = Material::new(Vec3::new(0.5, 0.6, 0.7), 0.0, 0.0, MaterialType::Metal);
     world.push(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, mat_metal));
 
     world
@@ -76,7 +76,7 @@ fn random_scene() -> Vec<Sphere> {
 fn main() {
 
     // Image 
-    let width: i32 = 256;
+    let width: i32 = 1920;
     let aspect_ratio: f32 = 16.0 / 9.0;
     let height: i32 = ((width as f32) / aspect_ratio) as i32;
 
@@ -104,8 +104,8 @@ fn main() {
 
     let now = time::Instant::now();
 
-    render(ctx);
-    // render_multithreading(ctx);
+    // render(ctx);
+    render_multithreading(ctx);
 
     let time = now.elapsed().as_secs();
     let formatted_number = time.to_formatted_string(&Locale::fr);
@@ -138,7 +138,7 @@ pub fn render(ctx: RenderContext) {
 pub fn render_multithreading(ctx: RenderContext) {
 
     // Number of threads to spawn
-    let n_threads = 16;
+    let n_threads = 15;
     
     if ctx.height % n_threads != 0 {
         eprintln!("Can't divide {} into {} equal parts!", ctx.height, n_threads);
