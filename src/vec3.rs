@@ -9,6 +9,18 @@ pub struct Vec3 {
     pub z: f32,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct IVec3 {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
+}
+
+impl IVec3 {
+    pub fn new(x: i32, y: i32, z: i32) -> IVec3 { IVec3 { x, y, z } }
+    pub fn zero() -> IVec3 { IVec3 { x: 0, y: 0, z: 0 } }
+}
+
 impl Vec3 {
     
     pub fn new(x: f32, y: f32, z: f32) -> Vec3 { Vec3 { x, y, z } }

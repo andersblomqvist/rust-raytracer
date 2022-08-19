@@ -1,5 +1,6 @@
 use crate::{vec3::Vec3, ray::Ray, utils::deg_to_rad};
 
+#[derive(Clone, Copy)]
 pub struct Camera {
     pub aspect_ratio: f32,
     pub viewport_height: f32,

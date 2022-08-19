@@ -1,27 +1,5 @@
 use crate::{vec3::Vec3, ray::{Intersection, Ray}, utils::random_f32};
 
-/**
- *  Material
- *  - albedo: Vec3
- *  scatter diffuse
- *  scatter metal
- * 
- *  diffuse = Material::diffuse()
- *  metal = Material::metal()
- * 
- *  Sphere::new(center, radius, diffuse)
- *  Sphere::new(center, radius, metal)
- * 
- *  sphere.scatter() => scatter Trait
- * 
- *  fn scatter(&self) {
- *      match &self.material_type {
- *          MaterialType.METAL => scatter_diffuse()
- *          MaterialType.DIFFUSE => scatter_metal()
- *      }
- *  }
- */
-
 #[derive(Clone, Copy)]
 pub enum MaterialType {
     Diffuse,

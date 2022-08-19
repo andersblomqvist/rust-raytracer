@@ -1,5 +1,6 @@
 use crate::{ray::{Intersectable, Intersection, Ray}, vec3::Vec3, material::Material};
 
+#[derive(Clone, Copy)]
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f32,
